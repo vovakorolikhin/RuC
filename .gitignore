@@ -26,3 +26,5 @@ ruc-compiler
 build
 *.sublime-workspace
 
+.idea/
+	cmake-build-debug/
