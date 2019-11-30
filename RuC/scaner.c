@@ -18,10 +18,11 @@ extern void error(int);
 extern void warning(int);
 extern void printf_char(int);
 
+/// Считывает один символ в формате UTF-8. Может быть русским, тогда разбирается 2 символа.
+/// \return
 int getnext()
 {
     // reads UTF-8
-
     unsigned char firstchar, secondchar;
     if (fscanf(input, "%c", &firstchar) == EOF)
         return EOF;
@@ -40,8 +41,9 @@ int getnext()
             getnext();
         //                if(kw)
         //                    printf("nextchar %c %i\n", nextchar, nextchar);
+        printf("%c %c | ", firstchar, nextchar);
     }
-
+    printf("\n");
     return nextchar;
 }
 
@@ -76,7 +78,7 @@ void endnl()
         endofline();
     }
 }
-
+// записывает информацию в массив source, подсчитывает количество символов в строке в lines
 void nextch()
 {
     onemore();
@@ -571,11 +573,17 @@ int scan()
             int oldrepr = rp, r;
             rp += 2;
             hash = 0;
+            /*
+             * У каждого слова* есть хэш_1. По хэшу_1 в hashtab хранится число r
+             * r = индекс, по которому хранится коллизия слова в reprtab*
+             * r + 1 = тип включевого слова - ВОЗВРАЩАЕТСЯ ОН
+             * r + 2... - сами слова. Символ окончания 0.
+             */
 
             // решетка на 1 месте -- значит, ключевое слово препроцессора
             do
             {
-
+                // считывание слова пока символ или цифра, вычисление хэша, занесение символов в reprtab
                 hash += curchar;
                 reprtab[rp++] = curchar;
                 nextch();
@@ -583,14 +591,14 @@ int scan()
 
             hash &= 255;
             reprtab[rp++] = 0;
-            r = hashtab[hash];
+            r = hashtab[hash]; // получение позиции в reprtab по хэшу
             if (r)
             {
                 do
                 {
-                    if (equal(r, oldrepr))
+                    if (equal(r, oldrepr)) // равны ли ключевые слова?
                     {
-                        rp = oldrepr;
+                        rp = oldrepr; // если равны, то возвращаем указатель в reprtab обратно, т.к. ничего записывать не надо
                         return (reprtab[r + 1] < 0) ? reprtab[r + 1]
                                                     : (repr = r, IDENT);
                     }
